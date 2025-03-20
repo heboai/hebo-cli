@@ -71,12 +71,16 @@ def pull(profile, agent):
 
     os.makedirs(agent_dir, exist_ok=True)
 
-    # Fetch data from API
-    knowledge = _make_request(f"{deployment_url}/api/knowledge/?agent_version={agent}")
-    tools = _make_request(f"{deployment_url}/api/tools/?agent_version={agent}")
-    agent_settings = _make_request(
-        f"{deployment_url}/api/agent-settings/?agent_version={agent}"
-    )
+    # Show progress while fetching data
+    with click.progressbar(length=3, label="Fetching data") as bar:
+        knowledge = _make_request(f"{deployment_url}/api/knowledge/?agent_version={agent}")
+        bar.update(1)
+        tools = _make_request(f"{deployment_url}/api/tools/?agent_version={agent}")
+        bar.update(1)
+        agent_settings = _make_request(
+            f"{deployment_url}/api/agent-settings/?agent_version={agent}"
+        )
+        bar.update(1)
 
     if not all([knowledge, tools, agent_settings]):
         click.echo("Failed to fetch all required data. Aborting.")
@@ -94,26 +98,32 @@ def pull(profile, agent):
     # Sort knowledge pages by position
     sorted_knowledge = sorted(knowledge, key=lambda x: x.get("position", 0))
 
-    for page in sorted_knowledge:
-        filename = f"{page['title']}.md"
-        filepath = os.path.join(knowledge_dir, filename)
-        with open(filepath, "w", encoding="utf-8") as f:
-            f.write(page["content"])
+    # Show progress while saving knowledge pages
+    with click.progressbar(sorted_knowledge, label="Saving knowledge pages") as bar:
+        for page in bar:
+            filename = f"{page['title']}.md"
+            filepath = os.path.join(knowledge_dir, filename)
+            with open(filepath, "w", encoding="utf-8") as f:
+                f.write(page["content"])
 
     # Create tools directory and save tools
     tools_dir = os.path.join(agent_dir, "tools")
     os.makedirs(tools_dir, exist_ok=True)
 
-    for tool in tools:
-        filename = f"{tool['name']}.yaml"
-        filepath = os.path.join(tools_dir, filename)
-        with open(filepath, "w", encoding="utf-8") as f:
-            yaml.dump(tool, f, allow_unicode=True, sort_keys=False)
+    # Show progress while saving tools
+    with click.progressbar(tools, label="Saving tools") as bar:
+        for tool in bar:
+            filename = f"{tool['name']}.yaml"
+            filepath = os.path.join(tools_dir, filename)
+            with open(filepath, "w", encoding="utf-8") as f:
+                yaml.dump(tool, f, allow_unicode=True, sort_keys=False)
 
     # Save agent settings
-    settings_file = os.path.join(agent_dir, "agent-settings.yaml")
-    with open(settings_file, "w", encoding="utf-8") as f:
-        yaml.dump(agent_settings[0], f, allow_unicode=True, sort_keys=False)
+    with click.progressbar(length=1, label="Saving agent settings") as bar:
+        settings_file = os.path.join(agent_dir, "agent-settings.yaml")
+        with open(settings_file, "w", encoding="utf-8") as f:
+            yaml.dump(agent_settings[0], f, allow_unicode=True, sort_keys=False)
+        bar.update(1)
 
     click.echo(f"Successfully pulled data for agent '{agent}'")
 
