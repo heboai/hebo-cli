@@ -73,7 +73,9 @@ def pull(profile, agent):
 
     # Show progress while fetching data
     with click.progressbar(length=3, label="Fetching data") as bar:
-        knowledge = _make_request(f"{deployment_url}/api/knowledge/?agent_version={agent}")
+        knowledge = _make_request(
+            f"{deployment_url}/api/knowledge/?agent_version={agent}"
+        )
         bar.update(1)
         tools = _make_request(f"{deployment_url}/api/tools/?agent_version={agent}")
         bar.update(1)
