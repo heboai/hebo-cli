@@ -10,6 +10,7 @@ from .config import save_profile, get_token, get_deployment_url
 
 
 @click.group()
+@click.version_option(package_name="hebo-cli")
 def main():
     pass
 
