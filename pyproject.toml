@@ -7,12 +7,13 @@ packages = ["hebo"]
 
 [project]
 name = "hebo-cli"
-version = "0.1.1"
+version = "0.1.2"
 description = "CLI for Hebo"
 readme = "README.md"
 requires-python = ">=3.8"
 dependencies = [
     "click>=8.1.8",
+    "pyyaml>=6.0.2",
     "requests>=2.32.3",
 ]
 authors = [
