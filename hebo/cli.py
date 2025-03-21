@@ -164,8 +164,8 @@ def push(profile, dry_run, agent):
         if tools_response:
             report = tools_response.get("report", {})
             click.echo(f"Created: {len(report.get('created', []))} tools")
-            deleted = report.get('deleted', [])
-            deleted_count = deleted[0].get('count', 0) if deleted else 0
+            deleted = report.get("deleted", [])
+            deleted_count = deleted[0].get("count", 0) if deleted else 0
             click.echo(f"Deleted: {deleted_count} tools")
             if report.get("errors"):
                 click.echo("Errors:")
