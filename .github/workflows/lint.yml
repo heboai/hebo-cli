@@ -19,6 +19,6 @@ jobs:
       # Install and run Ruff
       - name: Run Ruff
         run: |
-          uv pip install ruff
-          uv run ruff check .
-          uv run ruff format --check . 
+          uv tool install ruff
+          ruff check .
+          ruff format --check . 
