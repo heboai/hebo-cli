@@ -23,7 +23,7 @@ hebo pull agent-name [-p profile-name]
 ### To update remote knowledge and configuration with local files
 
 ```
-hebo push
+hebo push agent-name [-p profile-name]
 ```
 
 ## Contributing
