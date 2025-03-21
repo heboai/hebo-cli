@@ -7,7 +7,7 @@ packages = ["hebo"]
 
 [project]
 name = "hebo-cli"
-version = "0.1.4"
+version = "0.1.5"
 description = "CLI for Hebo"
 readme = "README.md"
 requires-python = ">=3.8"
@@ -19,8 +19,7 @@ dependencies = [
 authors = [
     { name = "turisanapo", email = "davide@hebo.ai" },
 ]
-# Optional but recommended fields
-license = { text = "MIT" }
+license = { text = "FSL-1.1-ALv2" }
 keywords = ["cli", "api"]
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -39,9 +38,7 @@ hebo = "hebo.cli:main"
 
 [dependency-groups]
 dev = [
-    "build>=1.2.2.post1",
     "ruff>=0.11.0",
-    "twine>=6.1.0",
 ]
 
 [tool.ruff]
