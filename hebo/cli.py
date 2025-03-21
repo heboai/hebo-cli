@@ -85,9 +85,11 @@ def pull(profile, agent):
         )
         bar.update(1)
 
-    if not all([knowledge, tools, agent_settings]):
-        click.echo("Failed to fetch all required data. Aborting.")
+    if knowledge is None or agent_settings is None:
+        click.echo("Failed to fetch required data. Aborting.")
         return
+
+    tools = tools or []
 
     # Type assertions after null checks
     knowledge = cast(List[Dict[str, Any]], knowledge)
