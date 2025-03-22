@@ -86,16 +86,16 @@ def push(profile, dry_run, agent):
                     {"title": title, "content": content, "position": position + 1}
                 )
 
-    # Read and prepare tools
-    tools_dir = os.path.join(agent_dir, "tools")
-    tools = []
-    if os.path.exists(tools_dir):
-        for filename in os.listdir(tools_dir):
+    # Read and prepare MCP config
+    mcp_config_dir = os.path.join(agent_dir, "mcp-config")
+    mcp_configs = []
+    if os.path.exists(mcp_config_dir):
+        for filename in os.listdir(mcp_config_dir):
             if filename.endswith(".yaml"):
-                filepath = os.path.join(tools_dir, filename)
+                filepath = os.path.join(mcp_config_dir, filename)
                 with open(filepath, "r", encoding="utf-8") as f:
-                    tool = yaml.safe_load(f)
-                    tools.append(tool)
+                    mcp_config = yaml.safe_load(f)
+                    mcp_configs.append(mcp_config)
 
     # Read agent settings
     settings_file = os.path.join(agent_dir, "agent-settings.yaml")
@@ -111,9 +111,9 @@ def push(profile, dry_run, agent):
         click.echo(f"Knowledge pages to update: {len(knowledge_pages)}")
         for page in knowledge_pages:
             click.echo(f"  - {page['title']}")
-        click.echo(f"\nTools to update: {len(tools)}")
-        for tool in tools:
-            click.echo(f"  - {tool['name']}")
+        click.echo(f"MCP config to update: {len(mcp_configs)}")
+        for config in mcp_configs:
+            click.echo(f"  - {config['sse_url']}")
         click.echo("\nAgent settings will be updated")
         return
 
@@ -155,18 +155,19 @@ def push(profile, dry_run, agent):
         else:
             click.echo("Settings updated successfully")
 
-    # Upload tools if present
-    if tools:
-        click.echo("\nUploading tools...")
-        tools_response = _make_post_request(
-            f"{deployment_url}/api/tools/bulk_update/?agent_version={agent}", tools
+    # Upload MCP config if present
+    if mcp_configs:
+        click.echo("\nUploading MCP config...")
+        mcp_config_response = _make_post_request(
+            f"{deployment_url}/api/mcp-config/bulk_update/?agent_version={agent}",
+            mcp_configs,
         )
-        if tools_response:
-            report = tools_response.get("report", {})
-            click.echo(f"Created: {len(report.get('created', []))} tools")
+        if mcp_config_response:
+            report = mcp_config_response.get("report", {})
+            click.echo(f"Created: {len(report.get('created', []))} MCP configs")
             deleted = report.get("deleted", [])
             deleted_count = deleted[0].get("count", 0) if deleted else 0
-            click.echo(f"Deleted: {deleted_count} tools")
+            click.echo(f"Deleted: {deleted_count} MCP configs")
             if report.get("errors"):
                 click.echo("Errors:")
                 for error in report["errors"]:
@@ -220,7 +221,9 @@ def pull(profile, agent):
             f"{deployment_url}/api/knowledge/?agent_version={agent}"
         )
         bar.update(1)
-        tools = _make_request(f"{deployment_url}/api/tools/?agent_version={agent}")
+        mcp_config = _make_request(
+            f"{deployment_url}/api/mcp-config/?agent_version={agent}"
+        )
         bar.update(1)
         agent_settings = _make_request(
             f"{deployment_url}/api/agent-settings/?agent_version={agent}"
@@ -231,11 +234,11 @@ def pull(profile, agent):
         click.echo("Failed to fetch required data. Aborting.")
         return
 
-    tools = tools or []
+    mcp_config = mcp_config or []
 
     # Type assertions after null checks
     knowledge = cast(List[Dict[str, Any]], knowledge)
-    tools = cast(List[Dict[str, Any]], tools)
+    mcp_config = cast(List[Dict[str, Any]], mcp_config)
     agent_settings = cast(List[Dict[str, Any]], agent_settings)
 
     # Create knowledge directory and save pages
@@ -253,17 +256,17 @@ def pull(profile, agent):
             with open(filepath, "w", encoding="utf-8") as f:
                 f.write(page["content"])
 
-    # Create tools directory and save tools
-    tools_dir = os.path.join(agent_dir, "tools")
-    os.makedirs(tools_dir, exist_ok=True)
+    # Create MCP config directory and save MCP config
+    mcp_config_dir = os.path.join(agent_dir, "mcp-config")
+    os.makedirs(mcp_config_dir, exist_ok=True)
 
-    # Show progress while saving tools
-    with click.progressbar(tools, label="Saving tools") as bar:
-        for tool in bar:
-            filename = f"{tool['name']}.yaml"
-            filepath = os.path.join(tools_dir, filename)
+    # Show progress while saving MCP config
+    with click.progressbar(mcp_config, label="Saving MCP config") as bar:
+        for i, config in enumerate(bar):
+            filename = f"mcp-config-{i}.yaml"
+            filepath = os.path.join(mcp_config_dir, filename)
             with open(filepath, "w", encoding="utf-8") as f:
-                yaml.dump(tool, f, allow_unicode=True, sort_keys=False)
+                yaml.dump(config, f, allow_unicode=True, sort_keys=False)
 
     # Save agent settings
     with click.progressbar(length=1, label="Saving agent settings") as bar:
