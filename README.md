@@ -20,6 +20,12 @@ hebo config
 hebo pull agent-name [-p profile-name]
 ```
 
+### To add a MCP client configuration
+
+```
+hebo add mcp-config agent-name
+```
+
 ### To update remote knowledge and configuration with local files
 
 ```

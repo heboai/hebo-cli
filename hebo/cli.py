@@ -278,5 +278,54 @@ def pull(profile, agent):
     click.echo(f"Successfully pulled data for agent '{agent}'")
 
 
+@main.command()
+@click.argument("what")
+@click.argument("agent")
+def add(what, agent):
+    """Add new configurations to an agent. Currently supports: mcp-config"""
+    if what != "mcp-config":
+        click.echo("Currently only 'mcp-config' is supported as the first argument")
+        return
+
+    # Validate agent directory exists
+    agent_dir = os.path.join(os.getcwd(), agent)
+    if not os.path.exists(agent_dir):
+        click.echo(
+            f"Directory '{agent}' not found. Please run 'hebo pull {agent}' first."
+        )
+        return
+
+    # Get required sse_url and optional sse_token
+    sse_url = click.prompt("Enter SSE URL (required)", type=str)
+    if not sse_url:
+        click.echo("SSE URL is required")
+        return
+
+    sse_token = click.prompt("Enter SSE token (optional, press enter to skip)", type=str, default="", show_default=False)
+    sse_token = sse_token if sse_token else None
+
+    # Create or use existing mcp-config directory
+    mcp_config_dir = os.path.join(agent_dir, "mcp-config")
+    os.makedirs(mcp_config_dir, exist_ok=True)
+
+    # Determine the next index
+    existing_configs = [f for f in os.listdir(mcp_config_dir) if f.endswith('.yaml')]
+    next_index = len(existing_configs)
+
+    # Create new config
+    new_config = {
+        "sse_url": sse_url,
+        "sse_token": sse_token
+    }
+
+    # Save to file
+    filename = f"mcp-config-{next_index}.yaml"
+    filepath = os.path.join(mcp_config_dir, filename)
+    with open(filepath, "w", encoding="utf-8") as f:
+        yaml.dump(new_config, f, allow_unicode=True, sort_keys=False)
+
+    click.echo(f"Successfully added new MCP config to agent '{agent}'")
+
+
 if __name__ == "__main__":
     main()
