@@ -301,7 +301,12 @@ def add(what, agent):
         click.echo("SSE URL is required")
         return
 
-    sse_token = click.prompt("Enter SSE token (optional, press enter to skip)", type=str, default="", show_default=False)
+    sse_token = click.prompt(
+        "Enter SSE token (optional, press enter to skip)",
+        type=str,
+        default="",
+        show_default=False,
+    )
     sse_token = sse_token if sse_token else None
 
     # Create or use existing mcp-config directory
@@ -309,14 +314,11 @@ def add(what, agent):
     os.makedirs(mcp_config_dir, exist_ok=True)
 
     # Determine the next index
-    existing_configs = [f for f in os.listdir(mcp_config_dir) if f.endswith('.yaml')]
+    existing_configs = [f for f in os.listdir(mcp_config_dir) if f.endswith(".yaml")]
     next_index = len(existing_configs)
 
     # Create new config
-    new_config = {
-        "sse_url": sse_url,
-        "sse_token": sse_token
-    }
+    new_config = {"sse_url": sse_url, "sse_token": sse_token}
 
     # Save to file
     filename = f"mcp-config-{next_index}.yaml"
