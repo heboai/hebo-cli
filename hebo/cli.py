@@ -7,6 +7,7 @@ import requests
 import yaml
 
 from .config import save_profile, get_token, get_deployment_url
+from .utils import get_agent_dir
 
 
 @click.group()
@@ -51,10 +52,10 @@ def push(profile, dry_run, agent):
     headers = {"X-API-Key": token}
 
     # Validate agent directory exists
-    agent_dir = os.path.join(os.getcwd(), agent)
+    agent_dir = get_agent_dir(agent)
     if not os.path.exists(agent_dir):
         click.echo(
-            f"Directory '{agent}' not found. Please run 'hebo pull {agent}' first."
+            f"Directory for agent '{agent}' not found. Please run 'hebo pull {agent}' first."
         )
         return
 
@@ -203,10 +204,10 @@ def pull(profile, agent):
             return None
 
     # Create or handle agent directory
-    agent_dir = os.path.join(os.getcwd(), agent)
+    agent_dir = get_agent_dir(agent)
     if os.path.exists(agent_dir):
         if click.confirm(
-            f"Directory '{agent}' already exists. Do you want to delete it and recreate?"
+            f"Directory for agent '{agent}' already exists. Do you want to delete it and recreate?"
         ):
             shutil.rmtree(agent_dir)
         else:
@@ -288,10 +289,10 @@ def add(what, agent):
         return
 
     # Validate agent directory exists
-    agent_dir = os.path.join(os.getcwd(), agent)
+    agent_dir = get_agent_dir(agent)
     if not os.path.exists(agent_dir):
         click.echo(
-            f"Directory '{agent}' not found. Please run 'hebo pull {agent}' first."
+            f"Directory for agent '{agent}' not found. Please run 'hebo pull {agent}' first."
         )
         return
 
